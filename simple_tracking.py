@@ -26,20 +26,12 @@ logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 
 
-def get_urls():
-    logger.debug('get url list')
-    url_list = ['https://neris.csrc.gov.cn/alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805']
-    # url_list = ['/Users/xian.chen/Downloads/view-source_https___neris.csrc.gov.cn_alappl_home1_onlinealog_appMatrCde=92f7dba5b8244856893492c0c5c1f805.htm']
-
-    return url_list
-
-
 def get_html(quote_page):
     logger.debug('get html')
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit /'
                       ' 537.36(KHTML, like Gecko) Chrome / 71.0.3578.98 Safari / 537.36'}
-    print('You are visiting: {}'.format(quote_page))
+    # print('You are visiting: {}'.format(quote_page))
     response = requests.get(quote_page, headers=headers, verify=False).text
     soup = BeautifulSoup(response, 'html.parser')
     # soup = BeautifulSoup(open(quote_page), 'html.parser')
@@ -167,8 +159,12 @@ def send_email(df, date):
 if __name__ == "__main__":
     date = datetime.today().strftime("%Y%m%d")
 
-    urls = get_urls()
-    for url in urls:
+    url_list = ['https://neris.csrc.gov.cn/alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805']
+    # url_list = ['/Users/xian.chen/Downloads/view-source_https___neris.csrc.gov.cn_alappl_home1_onlinealog_appMatrCde=92f7dba5b8244856893492c0c5c1f805.htm']
+
+    for url in url_list:
+        logger.debug('accessing: {}'.format(url))
+
         soup = get_html(url)
         df = parse_data(soup, date)
         send_email(df, date)

@@ -1,7 +1,7 @@
-2020-04-02 09:45:09,034 DEBUG get url list
-2020-04-02 09:45:09,034 DEBUG get html
-2020-04-02 09:45:09,077 DEBUG Starting new HTTPS connection (1): neris.csrc.gov.cn:443
-2020-04-02 09:45:14,427 DEBUG https://neris.csrc.gov.cn:443 "GET /alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805 HTTP/1.1" 200 None
-2020-04-02 09:45:16,187 DEBUG parsing data
-2020-04-02 09:45:16,310 DEBUG sending email
-2020-04-02 09:45:18,239 DEBUG Mail Sent
+2020-04-02 10:48:23,584 DEBUG accessing: https://neris.csrc.gov.cn/alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805
+2020-04-02 10:48:23,585 DEBUG get html
+2020-04-02 10:48:23,607 DEBUG Starting new HTTPS connection (1): neris.csrc.gov.cn:443
+2020-04-02 10:48:31,649 DEBUG https://neris.csrc.gov.cn:443 "GET /alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805 HTTP/1.1" 200 None
+2020-04-02 10:48:33,464 DEBUG parsing data
+2020-04-02 10:48:33,592 DEBUG sending email
+2020-04-02 10:48:35,665 DEBUG Mail Sent
