@@ -4,6 +4,7 @@ from tqdm import tqdm
 from datetime import timedelta, date
 from collections import Counter
 import humanize
+import logging
 
 
 def makedir(dir_name):
@@ -26,3 +27,4 @@ def decorator_timeit(func):
         print(humanize.naturaltime(end_time - start_time))
 
     return wrapper
+

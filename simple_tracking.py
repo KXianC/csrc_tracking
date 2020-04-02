@@ -15,9 +15,19 @@ import sys
 import os
 import numpy as np
 from utils import makedir
+import logging
+
+# Create and config Logger
+LOG_FORMAT = '%(asctime)s %(levelname)s %(message)s'
+logging.basicConfig(filename='csrc.log', level=logging.DEBUG,
+                    format=LOG_FORMAT, filemode='w')
+
+logger = logging.getLogger()
+logger.addHandler(logging.StreamHandler())
 
 
 def get_urls():
+    logger.debug('get url list')
     url_list = ['https://neris.csrc.gov.cn/alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805']
     # url_list = ['/Users/xian.chen/Downloads/view-source_https___neris.csrc.gov.cn_alappl_home1_onlinealog_appMatrCde=92f7dba5b8244856893492c0c5c1f805.htm']
 
@@ -25,6 +35,7 @@ def get_urls():
 
 
 def get_html(quote_page):
+    logger.debug('get html')
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit /'
                       ' 537.36(KHTML, like Gecko) Chrome / 71.0.3578.98 Safari / 537.36'}
@@ -37,20 +48,22 @@ def get_html(quote_page):
 
 
 def parse_data(soup, date):
+    logger.debug('parsing data')
+
     # 申请事项名称
     titles = soup.findAll('li', {'data-toggle': 'tooltip'})
     # trs = soup.select('.templateTip')
     title = []
     for tr in titles:
         title.append(tr.text)
-    print(title)
+    print(title[0])
 
     # 申请日期
     app_dates = soup.findAll('td', {'class': 'text-center check check2'})
     l_app_dates = []
     for app_date in app_dates[::2]:
         l_app_dates.append(app_date.text)
-    print(l_app_dates)
+    # print(l_app_dates[0])
 
     # 进度跟踪
     progress = soup.findAll('td', {'class': 'text-center check check2'})
@@ -66,10 +79,10 @@ def parse_data(soup, date):
 
         l_progress.append(prog_result)
         l_progress_last.append(prog_result_last)
-    print(l_progress)
-    print(l_progress_last)
+    # print(l_progress)
+    print(l_progress_last[0])
 
-    print(len(title), len(l_app_dates), len(l_progress), len(l_progress_last))
+    # print(len(title), len(l_app_dates), len(l_progress), len(l_progress_last))
 
     l_progress_last_progress = []
     l_progress_last_date = []
@@ -96,6 +109,8 @@ def parse_data(soup, date):
 
 
 def send_email(df, date):
+    logger.debug('sending email')
+
     # to = 'xian.chen@blackrock.com, george.zhu@blackrock.com'
     to = 'kenxianchen007@gmail.com'
     cc = ''
@@ -137,8 +152,8 @@ def send_email(df, date):
         msg.attach(part)
 
     session = smtplib.SMTP('smtp.gmail.com', 587)
-    sender_address = 'kenxianchen@gmail.com'
-    sender_pass = 'sunshine2008'
+    sender_address = 'beautiful.tracking@gmail.com'
+    sender_pass = 'Tkjp1358'
 
     session.starttls()  # enable security
     session.login(sender_address, sender_pass)  # login with mail_id and password
@@ -146,7 +161,7 @@ def send_email(df, date):
     session.sendmail(msg['From'], rcpt, msg.as_string())
 
     session.quit()
-    print('Mail Sent')
+    logger.debug('Mail Sent')
 
 
 if __name__ == "__main__":
