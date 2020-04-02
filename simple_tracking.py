@@ -1,0 +1,159 @@
+import requests
+from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
+import pandas as pd
+from datetime import timedelta, date
+from datetime import datetime
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+from smtplib import SMTP
+import smtplib
+import sys
+import os
+import numpy as np
+from utils import makedir
+
+
+def get_urls():
+    url_list = ['https://neris.csrc.gov.cn/alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805']
+    # url_list = ['/Users/xian.chen/Downloads/view-source_https___neris.csrc.gov.cn_alappl_home1_onlinealog_appMatrCde=92f7dba5b8244856893492c0c5c1f805.htm']
+
+    return url_list
+
+
+def get_html(quote_page):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit /'
+                      ' 537.36(KHTML, like Gecko) Chrome / 71.0.3578.98 Safari / 537.36'}
+    print('You are visiting: {}'.format(quote_page))
+    response = requests.get(quote_page, headers=headers, verify=False).text
+    soup = BeautifulSoup(response, 'html.parser')
+    # soup = BeautifulSoup(open(quote_page), 'html.parser')
+
+    return soup
+
+
+def parse_data(soup, date):
+    # 申请事项名称
+    titles = soup.findAll('li', {'data-toggle': 'tooltip'})
+    # trs = soup.select('.templateTip')
+    title = []
+    for tr in titles:
+        title.append(tr.text)
+    print(title)
+
+    # 申请日期
+    app_dates = soup.findAll('td', {'class': 'text-center check check2'})
+    l_app_dates = []
+    for app_date in app_dates[::2]:
+        l_app_dates.append(app_date.text)
+    print(l_app_dates)
+
+    # 进度跟踪
+    progress = soup.findAll('td', {'class': 'text-center check check2'})
+    l_progress = []
+    l_progress_last = []
+    for prog in progress[1::2]:
+        prog_data = prog.findAll('tr')
+        prog_result = ''
+        prog_result_last = ''
+        for prog_element in prog_data[2:]:
+            prog_result = prog_result + prog_element.text.replace('\n', '') + '->'
+            prog_result_last = prog_element.text.strip('\n')
+
+        l_progress.append(prog_result)
+        l_progress_last.append(prog_result_last)
+    print(l_progress)
+    print(l_progress_last)
+
+    print(len(title), len(l_app_dates), len(l_progress), len(l_progress_last))
+
+    l_progress_last_progress = []
+    l_progress_last_date = []
+    for s in l_progress_last:
+        l_progress_last_progress.append(s.split('\n')[0])
+        l_progress_last_date.append(s.split('\n')[1])
+
+    df = pd.DataFrame(
+        {'申请事项名称': title,
+         '申请日期': l_app_dates,
+         '更新日期': l_progress_last_date,
+         '更新进度': l_progress_last_progress,
+         '进度跟踪': l_progress
+         })
+
+    df.index = np.arange(1, len(df) + 1)
+
+    output_path = 'result'
+    makedir(output_path)
+    df.to_excel('{}/{}_csrc_mutual_fund_application.xls'.format(output_path, date))
+    df.to_html('{}/{}_csrc_mutual_fund_application.html'.format(output_path, date))
+
+    return df
+
+
+def send_email(df, date):
+    # to = 'xian.chen@blackrock.com, george.zhu@blackrock.com'
+    to = 'kenxianchen007@gmail.com'
+    cc = ''
+    bcc = ''
+    rcpt = cc.split(",") + bcc.split(",") + to.split(",")
+    msg = MIMEMultipart()
+    msg['Subject'] = "Test - CSRC Mutual Fund Application Tracking {}".format(date)
+    msg['From'] = 'kenxianchen@gmail.com'
+    msg['To'] = to
+    msg['Cc'] = cc
+
+    html = """
+    <html>
+      <head>
+    <style> 
+      table, th, td {{ border: 1px solid black; border-collapse: collapse; }}
+      th, td {{ padding: 5px; }}
+    </style>      
+     </head>
+      <body>
+        {0}
+      </body>
+    </html>
+    """.format(df.to_html())
+
+    part1 = MIMEText(html, 'html')
+    msg.attach(part1)
+
+    files = ['result/{}_csrc_mutual_fund_application.xls'.format(date), 'result/{}_csrc_mutual_fund_application.html'.format(date)]
+    for a_file in files:
+        attachment = open(a_file, 'rb')
+        file_name = os.path.basename(a_file)
+        part = MIMEBase('application', 'octet-stream')
+        part.set_payload(attachment.read())
+        part.add_header('Content-Disposition',
+                        'attachment',
+                        filename=file_name)
+        encoders.encode_base64(part)
+        msg.attach(part)
+
+    session = smtplib.SMTP('smtp.gmail.com', 587)
+    sender_address = 'kenxianchen@gmail.com'
+    sender_pass = 'sunshine2008'
+
+    session.starttls()  # enable security
+    session.login(sender_address, sender_pass)  # login with mail_id and password
+
+    session.sendmail(msg['From'], rcpt, msg.as_string())
+
+    session.quit()
+    print('Mail Sent')
+
+
+if __name__ == "__main__":
+    date = datetime.today().strftime("%Y%m%d")
+
+    urls = get_urls()
+    for url in urls:
+        soup = get_html(url)
+        df = parse_data(soup, date)
+        send_email(df, date)
