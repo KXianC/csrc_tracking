@@ -2,38 +2,58 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from fake_useragent import UserAgent
+from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
+from timeout_decorator import timeout, TimeoutError
+from retry import retry
+import logging
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from utils import makedir
+
+
+# get直接返回，不再等待界面加载完成
+# desired_capabilities = DesiredCapabilities.CHROME
+# desired_capabilities["pageLoadStrategy"] = "none"
+
+# Create and config Logger
+LOG_FORMAT = '%(asctime)s %(levelname)s %(message)s'
+logging.basicConfig(filename='log_selenium.log', level=logging.DEBUG,
+                    format=LOG_FORMAT, filemode='w')
+
+logger = logging.getLogger()
+logger.addHandler(logging.StreamHandler())
+
+# set the header for browser
+options = Options()
+# options.add_argument("--headless")
+
+
+def load_page(url):
+    chromedriver = '/Users/xian.chen/Dropbox/Repo/drivers/chromedriver'
+    driver = webdriver.Chrome(options=options, executable_path=chromedriver)
+
+    logger.debug('loading... '+ url)
+    driver.get(url)
+
+    return driver
+
+
+def parse_data(driver):
+    # 申请事项名称
+    titles = []
+    for i in range(1, 11):
+        title = driver.find_element_by_xpath('/html/body/div[1]/div[2]/div[1]/div[2]/div/table/tbody/tr[{}]/td[1]/ul/li'.format(i))
+        titles.append(title.text)
+
+    print(titles, len(titles))
+    return titles
 
 
 if __name__ == "__main__":
-    chromedriver = '/Users/xian.chen/Dropbox/Repo/drivers/chromedriver'
-    driver = webdriver.Chrome(chromedriver)
-    driver.get('https://neris.csrc.gov.cn/alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805')
+    url = 'https://neris.csrc.gov.cn/alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805'
 
-    # title = driver.find_elements_by_css_selector('.templateTip')
-    title = driver.find_elements_by_xpath('//*[@id="divTip1"]/tbody/tr[3]/td[1]')
-    # print(title)
-    num = len(title)
-    # print(num)
-    for i in range(num):
-        print(title[i].text)
-
-    driver.close()
-
-# def get_urls():
-#     url_list = ['https://neris.csrc.gov.cn/alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805']
-#
-#     return url_list
-#
-#
-# def get_html(quote_page):
-#     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 71.0.3578.98 Safari / 537.36'}
-#     response = requests.get(quote_page, headers=headers, verify=False).text
-#     soup = BeautifulSoup(response, 'html.parser')
-#     return soup.prettify()
+    driver = load_page(url)
+    parse_data(driver)
+    driver.quit()
 
 
-# if __name__ == "__main__":
-#     urls = get_urls()
-#     for url in urls:
-#         page = get_html(url)
-#         print(page)

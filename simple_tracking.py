@@ -26,15 +26,28 @@ logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 
 
+# Create Email details here as global variables
+
+# to = 'xian.chen@blackrock.com, george.zhu@blackrock.com'
+# to = 'xian.chen@blackrock.com'
+to = 'kenxianchen007@gmail.com'
+cc = ''
+bcc = 'kenxianchen@gmail.com'
+
+
 def get_html(quote_page):
     logger.debug('get html')
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit /'
                       ' 537.36(KHTML, like Gecko) Chrome / 71.0.3578.98 Safari / 537.36'}
     # print('You are visiting: {}'.format(quote_page))
-    response = requests.get(quote_page, headers=headers, verify=False).text
-    soup = BeautifulSoup(response, 'html.parser')
-    # soup = BeautifulSoup(open(quote_page), 'html.parser')
+    if '/Users' in quote_page:
+        logger.debug('reading local page')
+        soup = BeautifulSoup(open(quote_page), 'html.parser')
+    else:
+        logger.debug('reading online page')
+        response = requests.get(quote_page, headers=headers, verify=False).text
+        soup = BeautifulSoup(response, 'html.parser')
 
     return soup
 
@@ -103,16 +116,14 @@ def parse_data(soup, date):
 def send_email(df, date):
     logger.debug('sending email')
 
-    # to = 'xian.chen@blackrock.com, george.zhu@blackrock.com'
-    to = 'kenxianchen007@gmail.com'
-    cc = ''
-    bcc = ''
     rcpt = cc.split(",") + bcc.split(",") + to.split(",")
     msg = MIMEMultipart()
     msg['Subject'] = "Test - CSRC Mutual Fund Application Tracking {}".format(date)
-    msg['From'] = 'kenxianchen@gmail.com'
+    msg['From'] = 'sendingamail.only@gmail.com'
     msg['To'] = to
     msg['Cc'] = cc
+    sender_address = 'sendingamail.only@gmail.com'
+    sender_pass = 'Tkjp1358'
 
     html = """
     <html>
@@ -144,8 +155,6 @@ def send_email(df, date):
         msg.attach(part)
 
     session = smtplib.SMTP('smtp.gmail.com', 587)
-    sender_address = 'beautiful.tracking@gmail.com'
-    sender_pass = 'Tkjp1358'
 
     session.starttls()  # enable security
     session.login(sender_address, sender_pass)  # login with mail_id and password
@@ -159,6 +168,7 @@ def send_email(df, date):
 if __name__ == "__main__":
     date = datetime.today().strftime("%Y%m%d")
 
+    # url_list = ['https://neris.csrc.gov.cn/alappl/home1/onlinealog.do']
     url_list = ['https://neris.csrc.gov.cn/alappl/home1/onlinealog?appMatrCde=92f7dba5b8244856893492c0c5c1f805']
     # url_list = ['/Users/xian.chen/Downloads/view-source_https___neris.csrc.gov.cn_alappl_home1_onlinealog_appMatrCde=92f7dba5b8244856893492c0c5c1f805.htm']
 
