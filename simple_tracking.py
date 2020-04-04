@@ -19,7 +19,7 @@ import logging
 
 # Create and config Logger
 LOG_FORMAT = '%(asctime)s %(levelname)s %(message)s'
-logging.basicConfig(filename='csrc.log', level=logging.DEBUG,
+logging.basicConfig(filename='log/csrc.log', level=logging.DEBUG,
                     format=LOG_FORMAT, filemode='w')
 
 logger = logging.getLogger()

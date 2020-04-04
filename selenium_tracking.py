@@ -17,7 +17,7 @@ from utils import makedir
 
 # Create and config Logger
 LOG_FORMAT = '%(asctime)s %(levelname)s %(message)s'
-logging.basicConfig(filename='log_selenium.log', level=logging.DEBUG,
+logging.basicConfig(filename='log/log_selenium.log', level=logging.DEBUG,
                     format=LOG_FORMAT, filemode='w')
 
 logger = logging.getLogger()

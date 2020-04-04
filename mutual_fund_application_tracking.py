@@ -23,8 +23,10 @@ from utils import makedir
 
 # Create and config Logger
 LOG_FORMAT = '%(asctime)s %(levelname)s %(message)s'
-logging.basicConfig(filename='log_mutual_fund_application_tracking.log', level=logging.INFO,
-                    format=LOG_FORMAT, filemode='w')
+logging.basicConfig(filename='/Users/xian.chen/Dropbox/Repo/csrc_tracking/log/{}_log_mutual_fund_application_tracking.log'.format(datetime.today().strftime("%Y%m%d_%H%M%S")),
+                    level=logging.DEBUG,
+                    format=LOG_FORMAT,
+                    filemode='w')
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 
@@ -32,7 +34,7 @@ logger.addHandler(logging.StreamHandler())
 options = Options()
 
 
-# options.add_argument('--headless')
+options.add_argument('--headless')
 # options.add_argument('--ignore-certificate-errors')
 # options.add_argument('--incognito')
 
@@ -59,7 +61,7 @@ class MutualFundScraper(object):
         self.sender_pass = 'Tkjp1358'
 
         # Files output path
-        self.out_put_path = 'parsed_result'
+        self.out_put_path = '/Users/xian.chen/Dropbox/Repo/csrc_tracking/parsed_result'
 
         # seconds to wait for the page to load
         self.delay = 10

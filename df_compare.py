@@ -13,8 +13,8 @@ class DfCompare(object):
         self.today = datetime.today().strftime("%Y%m%d")
         self.yesterday = (datetime.today() - timedelta(days=1)).strftime("%Y%m%d")
 
-        self.file_new = 'parsed_result/{}_csrc_mutual_fund_application.xls'.format(self.today)
-        self.file_old = 'parsed_result/{}_csrc_mutual_fund_application.xls'.format(self.yesterday)
+        self.file_new = '/Users/xian.chen/Dropbox/Repo/csrc_tracking/parsed_result/{}_csrc_mutual_fund_application.xls'.format(self.today)
+        self.file_old = '/Users/xian.chen/Dropbox/Repo/csrc_tracking/parsed_result/{}_csrc_mutual_fund_application.xls'.format(self.yesterday)
 
         self.df_old = pd.read_excel(self.file_old, index_col=0)
         self.df_new = pd.read_excel(self.file_new, index_col=0)
