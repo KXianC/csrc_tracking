@@ -1,3 +1,3 @@
 # csrc_tracking
 
-This project is to a web scraper that periodly visit SCRC website and 
+This project is to build a web scraper that visit SCRC website with a defined interval, and get updates of mutual fund applications.
